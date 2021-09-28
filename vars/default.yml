@@ -1,8 +1,8 @@
 ---
-node_1: "172.31.15.65"
-node_2: "172.31.12.94"
-node_3: "172.31.0.81"
-mysql_root_password: "hello"
+node_1: "10.10.1.1"
+node_2: "10.10.1.2"
+node_3: "10.10.1.2"
+mysql_root_password: "password"
 disable_default: true
 
 
