@@ -50,5 +50,5 @@ Once the playbook execution completed,
  >> execute systemctl start mysqld on node 2 and 3
 ```
 
-
+For HA-proxy setup: https://www.linuxtechi.com/install-configure-haproxy-centos-8-rhel-8/
 
