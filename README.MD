@@ -43,7 +43,7 @@ disable_default: true
 how to run :
 >> ansible-playbook mysql_galera.yml
 
-Once the plabook execution completed,
+Once the playbook execution completed,
 
  >> Reboot all nodes 
  >> execute /usr/bin/mysqld_bootstrap on node1
