@@ -3,6 +3,9 @@
 Pre-requisites: 3 RHEL-8 machines
 Ansible 2.5.1
 
+![Blank diagram](https://user-images.githubusercontent.com/50264439/135078883-593f354e-e7f4-494e-8a00-fe22353d4344.jpeg)
+
+
 ===============================================
 1) Edit inventory file and add nodes IP address (If your ansible master server is in same vpc , add private IP of nodes here , else use public IP)
    Edit ansible connection configurations also like below with your parameters
