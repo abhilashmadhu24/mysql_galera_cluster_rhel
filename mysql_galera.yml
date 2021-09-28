@@ -1,0 +1,148 @@
+---
+- name: Installing Dependancies on nodes
+  hosts: all
+  gather_facts: false
+  become_method: sudo
+  tasks:
+    - name: Updating and installing required packages
+      raw: "{{ item }}"
+      loop:
+        - yum install -y python36
+      become: true
+
+- name: Changing HostNames
+  hosts: all
+  become: true
+  become_method: sudo
+  any_errors_fatal: true
+  pre_tasks:
+    - import_tasks: hostname.yml
+      when: hostname is defined and hostname | length > 0
+      tags: hostname
+
+- name: Setting up SWAP and disabling SELINUX
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Creating swap
+      raw: "{{ item }}"
+      loop:
+        - dd if=/dev/zero of=/swapfile bs=1M count=512
+        - chmod 600 /swapfile
+        - mkswap /swapfile
+        - swapon /swapfile
+    - name: add to fstab
+      lineinfile:
+        dest: /etc/fstab
+        regexp: "/swapfile"
+        line: "/swapfile swap swap defaults 0 0"
+    - name: Disable selinux
+      command: sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+
+- name: Installing MYSQL GALERA Packages
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: disable default mysql module
+      copy:
+        dest: /etc/dnf/modules.d/mysql.module
+        content: |
+          [mysql]
+          name=mysql
+          stream=
+          profiles=
+          state=disabled
+    - name: Enabling MySQL-Galera Repo
+      template:
+        src: "roles/repo.j2"
+        dest: "/etc/yum.repos.d/galera.repo"
+        mode: '0644'
+    
+- hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Installing packages
+      raw: "{{ item }}"
+      loop:
+        - yum install mysql-wsrep-5.7 -y
+        - yum install galera -y
+
+- name: Setting up node 1
+  hosts: mysql_node1
+  become: true
+  become_method: sudo
+  vars_files:
+    - vars/default.yml
+  tasks:      
+    - name: Setting up configuration files.
+      template:
+        src: "roles/node1.cnf.j2"
+        dest: "/etc/my.cnf"
+        mode: '0644'
+    - name: Bootstraping node 1
+      shell: /usr/bin/mysqld_bootstrap
+    - name: Sending Root password script
+      template:
+        src: "roles/password_reset.j2"
+        dest: "/home/ec2-user/make.sh"
+        mode: '0777'
+    - name: Resetting Root password
+      command: sh /home/ec2-user/make.sh
+    - name: Stopping stand-alone service.
+      service:
+        name: mysqld
+        state: stopped
+        enabled: false
+
+- name: Setting up node 2
+  hosts: mysql_node2
+  become: true
+  become_method: sudo
+  vars_files:
+    - vars/default.yml
+  tasks:      
+    - name: Setting up configuration files.
+      template:
+        src: "roles/node2.cnf.j2"
+        dest: "/etc/my.cnf"
+        mode: '0644'
+    - name: Stopping stand-alone service.
+      service:
+        name: mysqld
+        state: stopped
+        enabled: true
+    
+        
+- name: Setting up node 3
+  hosts: mysql_node3
+  become: true
+  become_method: sudo
+  vars_files:
+    - vars/default.yml
+  tasks:      
+    - name: Setting up configuration files.
+      template:
+        src: "roles/node3.cnf.j2"
+        dest: "/etc/my.cnf"
+        mode: '0644'
+    - name: Stopping stand-alone service.
+      service:
+        name: mysqld
+        state: stopped
+        enabled: true
+
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Displaying pending steps
+      debug:
+        msg:
+        - 'Things left to do :'
+        - '- Reboot all nodes'
+        - '- execute /usr/bin/mysqld_bootstrap on node1'
+        - '- execute systemctl start mysqld on node 2 and 3'
+        
+  

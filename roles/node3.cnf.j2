@@ -1,0 +1,20 @@
+[mysqld]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+user=mysql
+binlog_format=ROW
+bind-address=0.0.0.0
+default_storage_engine=innodb
+innodb_autoinc_lock_mode=2
+innodb_flush_log_at_trx_commit=0
+innodb_buffer_pool_size=122M
+wsrep_provider=/usr/lib64/galera/libgalera_smm.so
+wsrep_provider_options="gcache.size=300M; gcache.page_size=300M"
+wsrep_cluster_name="galera_cluster1"
+wsrep_cluster_address=gcomm://{{ node_1 }},{{ node_2 }},{{ node_3 }}
+wsrep_sst_method=rsync
+server_id=3
+wsrep_node_address="{{ node_3 }}"
+wsrep_node_name="mysqlcluster03"
