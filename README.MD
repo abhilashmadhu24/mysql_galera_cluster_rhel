@@ -1,4 +1,4 @@
-##### Ansible-play book for MySQL Galera cluster in RHEL machines
+## Ansible-play book for MySQL Galera cluster in RHEL machines
 
 Pre-requisites: 3 RHEL-8 machines
 Ansible 2.5.1
