@@ -1,4 +1,4 @@
-
+# Refer Readme.MD for editing rules
 [mysql_node1]  # recommendation: 3 or 5-7 nodes
 10.10.1.1 hostname=mysql_node-1
 
